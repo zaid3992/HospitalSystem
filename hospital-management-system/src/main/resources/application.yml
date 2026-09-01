@@ -1,17 +1,21 @@
 spring:
   application:
     name: hospital-management-system
-    datasource:
-      url: jdbc:mysql://localhost:3306/hospitalDB
-      username: root
-      password: admin
+  datasource:
+    url: jdbc:mysql://localhost:3306/hospitalDB
+    username: root
+    password: admin
   jpa:
     hibernate:
       ddl-auto: create
     show-sql: true
-    defer-datasource-initialization: true
-  sql:
-    init:
-      mode: always
-      data-locations: classpath:data.sql
+#    defer-datasource-initialization: true
+#  sql:
+#    init:
+#      mode: always
+#      data-locations: classpath:data.sql
 #spring.jpa.properties.hibernate.format_sql=false
+
+server:
+  servlet:
+    context-path: /api/v1
