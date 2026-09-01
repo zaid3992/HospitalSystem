@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface PatientRepository extends JpaRepository<Patient, Long> {
 
@@ -33,14 +34,14 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 //    List<Object[]> countEachBloodGroupType();
     List<BloodGroupCountResponseEntity> countEachBloodGroupType();
 
-    @Query(value = "select * from patient", nativeQuery = true)
-    Page<Patient> findAllPatients(Pageable pageable);
-
     @Transactional
     @Modifying
     @Query("UPDATE Patient p SET p.name = :name where p.id = :id")
     int updateNameWithId(@Param("name") String name, @Param("id") Long id);
 
 
+    Optional<Patient> findByNameAndBirthDate(String name, LocalDate birthDate);
 
+    @Query("select p from Patient p")
+    Page<Patient> findAllPatients(Pageable pageable);
 }
