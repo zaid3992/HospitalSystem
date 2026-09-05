@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/hospitalDB
     username: root
-    password: admin
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -18,14 +18,14 @@ spring:
         user-name-attribute: id
     registration:
       google:
-        client-id: 204915941072-fckl8bu6ouj5lbq3q35ebb8k8hltns50.apps.googleusercontent.com
-        client-secret: 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
+        client-id: ${GOOGLE_OAUTH_CLIENT_ID}
+        client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
       github:
-        client-id: Ov23li6Y4tyIlaObRfLf
-        client-secret: 756e579bbf2532503465d7d34bfcec3b597369b2
+        client-id: ${GITHUB_OAUTH_CLIENT_ID}
+        client-secret: ${GITHUB_OAUTH_CLIENT_SECRET}
       twitter:
-        client-id: asdlfjasldf
-        client-secret: asldfjalsdfj
+        client-id: ${TWITTER_OAUTH_CLIENT_ID}
+        client-secret: ${TWITTER_OAUTH_CLIENT_SECRET}
         redirect-uri: "{baseUrl}/login/oauth2/code/twitter"
         authorization-grant-type: authorization_code
         scope:
@@ -51,4 +51,4 @@ server:
 # spring security configuration
 
 jwt:
-  secretKey: w3qY8JmV2nL7pR4xT9kF6sD1hG5cB8zQ0aW7eN2uP6I=
+  secretKey: ${JWT_SECRET_KEY}
