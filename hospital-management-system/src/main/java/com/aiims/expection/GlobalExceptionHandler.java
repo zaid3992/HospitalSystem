@@ -2,8 +2,11 @@ package com.aiims.expection;
 
 import com.aiims.dto.response.ErrorMessage;
 import com.aiims.expection.custom.*;
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -75,6 +78,68 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
+                .body(error);
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ErrorMessage> handleUserAlreadyExists(UserAlreadyExistsException ex) {
+
+        ErrorMessage error = new ErrorMessage(
+                HttpStatus.CONFLICT.value(),
+                "USER_ALREADY_EXISTS",
+                ex.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorMessage> handleAuthenticationException(AuthenticationException ex) {
+        ErrorMessage error = new ErrorMessage(
+                HttpStatus.UNAUTHORIZED.value(),
+                "AUTHENTICATION_FAILED",
+                ex.getMessage()
+        );
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(error);
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ErrorMessage> handleJwtException(JwtException ex) {
+        ErrorMessage error = new ErrorMessage(
+                HttpStatus.UNAUTHORIZED.value(),
+                "INVALID_JWT_TOKEN",
+                ex.getMessage()
+        );
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(error);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorMessage> handleAccessDeniedException(AccessDeniedException ex) {
+        ErrorMessage error = new ErrorMessage(
+                HttpStatus.FORBIDDEN.value(),
+                "ACCESS_DENIED",
+                ex.getMessage()
+        );
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(error);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorMessage> handleGenericException(Exception ex) {
+        ErrorMessage error = new ErrorMessage(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "INTERNAL_SERVER_ERROR",
+                "An unexpected error occurred: " + ex.getMessage()
+        );
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(error);
     }
 
