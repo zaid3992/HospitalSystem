@@ -7,8 +7,37 @@ spring:
     password: admin
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: true
+  security.oauth2.client:
+    provider:
+      twitter:
+        authorization-uri: https://twitter.com/i/oauth2/authorize
+        token-uri: https://api.twitter.com/2/oauth2/token
+        user-info-uri: https://api.twitter.com/2/users/me
+        user-name-attribute: id
+    registration:
+      google:
+        client-id: 204915941072-fckl8bu6ouj5lbq3q35ebb8k8hltns50.apps.googleusercontent.com
+        client-secret: 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
+      github:
+        client-id: Ov23li6Y4tyIlaObRfLf
+        client-secret: 756e579bbf2532503465d7d34bfcec3b597369b2
+      twitter:
+        client-id: asdlfjasldf
+        client-secret: asldfjalsdfj
+        redirect-uri: "{baseUrl}/login/oauth2/code/twitter"
+        authorization-grant-type: authorization_code
+        scope:
+          - tweet.read
+          - users.read
+          - offline.access
+        client-name: Twitter
+        provider: twitter
+#  security:
+#    user:
+#          name: admin
+#          password: admin
 #    defer-datasource-initialization: true
 #  sql:
 #    init:
@@ -19,3 +48,7 @@ spring:
 server:
   servlet:
     context-path: /api/v1
+# spring security configuration
+
+jwt:
+  secretKey: w3qY8JmV2nL7pR4xT9kF6sD1hG5cB8zQ0aW7eN2uP6I=
