@@ -1,12 +1,12 @@
 package com.aiims.service;
 
-import com.aiims.dto.request.DoctorRequestDto;
-import com.aiims.dto.response.AppointmentResponseDto;
+import com.aiims.dto.request.OnboardDoctorRequestDto;
 import com.aiims.dto.response.DoctorResponseDto;
-import com.aiims.entity.Doctor;
-import com.aiims.mapper.AppointmentMapper;
+import com.aiims.entity.User;
+import com.aiims.entity.type.RoleType;
 import com.aiims.mapper.DoctorMapper;
 import com.aiims.repository.DoctorRepository;
+import com.aiims.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class DoctorService {
 
     private final DoctorRepository doctorRepository;
     private final DoctorMapper doctorMapper;
-    private final AppointmentMapper appointmentMapper;
+    private final UserRepository userRepository;
 
     public List<DoctorResponseDto> getAllDoctors() {
         return doctorRepository.findAll()
@@ -30,8 +30,15 @@ public class DoctorService {
                 .collect(Collectors.toList());
     }
 
-    public DoctorResponseDto createDoctor(DoctorRequestDto doctorRequestDto) {
-        var doctor = doctorMapper.toEntity(doctorRequestDto);
+    public DoctorResponseDto createDoctor(OnboardDoctorRequestDto onboardDoctorRequestDto) {
+
+        User user = userRepository.findById(onboardDoctorRequestDto.getUserId()).orElseThrow();
+
+        if (doctorRepository.existsById(onboardDoctorRequestDto.getUserId())) {
+            throw new IllegalArgumentException("Doctor already exists");
+        }
+        var doctor = doctorMapper.toEntity(onboardDoctorRequestDto,user);
+        user.getRoles().add(RoleType.DOCTOR);
         doctorRepository.save(doctor);
         return doctorMapper.toDto(doctor);
     }

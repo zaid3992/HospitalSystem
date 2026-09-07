@@ -32,11 +32,6 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentMapper.toDto(updated));
     }
 
-    @GetMapping("/appointments")
-    public ResponseEntity<List<AppointmentResponseDto>> getAllAppointmentsOfDoctor() {
-        return ResponseEntity.ok(appointmentService.getAllAppointmentsOfDoctor(1L));
-    }
-
     @GetMapping("/doctor/{doctorId}")
     public ResponseEntity<List<AppointmentResponseDto>> getAllAppointmentsOfDoctor(@PathVariable Long doctorId) {
         List<AppointmentResponseDto> list = appointmentService.getAllAppointmentsOfDoctor(doctorId);

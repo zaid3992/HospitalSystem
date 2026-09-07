@@ -1,12 +1,16 @@
 package com.aiims.service;
 
 import com.aiims.dto.request.LoginRequestDto;
+import com.aiims.dto.request.SignUpRequestDto;
 import com.aiims.dto.response.LoginResponseDto;
 import com.aiims.dto.response.SignupResponseDto;
+import com.aiims.entity.Patient;
 import com.aiims.entity.User;
 import com.aiims.entity.type.AuthProviderType;
+import com.aiims.entity.type.RoleType;
 import com.aiims.expection.custom.UserAlreadyExistsException;
 import com.aiims.mapper.UserMapper;
+import com.aiims.repository.PatientRepository;
 import com.aiims.repository.UserRepository;
 import com.aiims.security.AuthUtil;
 import jakarta.transaction.Transactional;
@@ -21,6 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -31,6 +37,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final PatientRepository patientRepository;
 
     public LoginResponseDto login(LoginRequestDto loginRequestDto) {
         Authentication authentication = authenticationManager.authenticate(
@@ -42,7 +49,7 @@ public class AuthService {
         return userMapper.toLoginResponseDto(user, token);
     }
 
-    public User signUpInternal(LoginRequestDto signupRequestDto, AuthProviderType authProviderType, String providerId) {
+    public User signUpInternal(SignUpRequestDto signupRequestDto, AuthProviderType authProviderType, String providerId) {
         if (signupRequestDto == null || signupRequestDto.getUsername() == null || signupRequestDto.getUsername().isBlank()) {
             throw new IllegalArgumentException("Username is required");
         }
@@ -56,19 +63,29 @@ public class AuthService {
                 .username(signupRequestDto.getUsername())
                 .providerId(providerId)
                 .providerType(authProviderType)
+                .roles(signupRequestDto.getRoles()) // not setting default role here, roles should be provided in the request not recommended to set default role in the request
+//                .roles(Set.of(RoleType.PATIENT)) // default role
                 .build();
 
         if (authProviderType == AuthProviderType.EMAIL && signupRequestDto.getPassword() != null) {
             user.setPassword(passwordEncoder.encode(signupRequestDto.getPassword()));
         }
+        user = userRepository.save(user);
 
-        User saved = userRepository.save(user);
-        log.info("Created user id={} username={} provider={}{}", saved.getId(), saved.getUsername(), saved.getProviderType(), providerId != null ? " providerId=" + providerId : "");
-        return saved;
+        Patient patient = Patient.builder()
+                .name(signupRequestDto.getName())
+                .email(signupRequestDto.getUsername())
+                .user(user)
+                .build();
+
+        patientRepository.save(patient);
+
+        log.info("Created user id={} username={} provider={}{}", user.getId(), user.getUsername(), user.getProviderType(), providerId != null ? " providerId=" + providerId : "");
+        return user;
     }
 
     // signup controller
-    public SignupResponseDto signup(LoginRequestDto signupRequestDto) {
+    public SignupResponseDto signup(SignUpRequestDto signupRequestDto) {
         User user = signUpInternal(signupRequestDto, AuthProviderType.EMAIL, null);
         return userMapper.toSignupResponseDto(user);
     }
@@ -95,9 +112,11 @@ public class AuthService {
             // Create new user for this oauth provider
             String username = authUtil.determineUsernameFromOAuth2User(oAuth2User, registrationId, providerId);
 
-            LoginRequestDto dto = new LoginRequestDto();
+            SignUpRequestDto dto = new SignUpRequestDto();
             dto.setUsername(username);
             dto.setPassword(null);
+            dto.setName(oAuth2User.getAttribute("name"));
+            dto.setRoles(Set.of(RoleType.PATIENT)); // default role for OAuth2 signup
             user = signUpInternal(dto, providerType, providerId);
         } else {
             // existing linked user: ensure email is synced

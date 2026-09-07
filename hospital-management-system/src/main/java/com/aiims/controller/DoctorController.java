@@ -1,13 +1,15 @@
 package com.aiims.controller;
 
-import com.aiims.dto.request.DoctorRequestDto;
 import com.aiims.dto.response.AppointmentResponseDto;
-import com.aiims.dto.response.DoctorResponseDto;
+import com.aiims.entity.User;
 import com.aiims.service.AppointmentService;
 import com.aiims.service.DoctorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -17,11 +19,11 @@ import java.util.List;
 public class DoctorController {
 
     private final AppointmentService appointmentService;
-    private final DoctorService doctorService;
 
-    @PostMapping("/create")
-    public ResponseEntity<DoctorResponseDto> createDoctor(@RequestBody DoctorRequestDto doctorRequestDto) {
-        return ResponseEntity.ok(doctorService.createDoctor(doctorRequestDto));
+    @GetMapping("/appointments")
+    public ResponseEntity<List<AppointmentResponseDto>> getAllAppointmentsOfDoctor() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return ResponseEntity.ok(appointmentService.getAllAppointmentsOfDoctor(user.getId()));
     }
 
 }
