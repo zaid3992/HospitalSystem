@@ -1,13 +1,13 @@
 package com.aiims.controller;
 
+import com.aiims.dto.request.OnboardDoctorRequestDto;
+import com.aiims.dto.response.DoctorResponseDto;
 import com.aiims.dto.response.PatientResponseDto;
+import com.aiims.service.DoctorService;
 import com.aiims.service.PatientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,6 +17,7 @@ import java.util.List;
 public class AdminController {
 
     private final PatientService patientService;
+    private final DoctorService doctorService;
 
     @GetMapping("/patients")
     public ResponseEntity<List<PatientResponseDto>> getAllPatients(
@@ -24,5 +25,12 @@ public class AdminController {
             @RequestParam(value = "size", defaultValue = "10") Integer pageSize
     ) {
         return ResponseEntity.ok(patientService.getAllPatients(pageNumber, pageSize));
+    }
+
+
+    @PostMapping("/onboardDoctor")
+    public ResponseEntity<DoctorResponseDto> createDoctor(@RequestBody OnboardDoctorRequestDto onboardDoctorRequestDto) {
+
+        return ResponseEntity.ok(doctorService.createDoctor(onboardDoctorRequestDto));
     }
 }
