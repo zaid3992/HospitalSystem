@@ -1,12 +1,11 @@
 package com.aiims.security;
 
 
-import com.aiims.entity.type.RoleType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -14,6 +13,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
+import static com.aiims.entity.type.PermissionType.APPOINTMENT_DELETE;
+import static com.aiims.entity.type.PermissionType.USER_MANAGE;
 import static com.aiims.entity.type.RoleType.ADMIN;
 import static com.aiims.entity.type.RoleType.DOCTOR;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
@@ -21,7 +22,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
-@EnableMethodSecurity
+@EnableMethodSecurity// method level security annotations like @PreAuthorize, @PostAuthorize, @Secured, etc.
 public class WebSecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
@@ -36,6 +37,9 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests( auth -> auth
                         .requestMatchers("/public/**","/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/admin/**")
+                                .hasAnyAuthority(APPOINTMENT_DELETE.name(),
+                                        USER_MANAGE.name())
                         .requestMatchers("/admin/**").hasRole(ADMIN.name())
                         .requestMatchers("/doctors/**").hasAnyRole(DOCTOR.name(), ADMIN.name())
 //                        .requestMatchers("/patients/**").hasRole("PATIENT")
